@@ -26,6 +26,8 @@ protected:
     int m_maxheight; // tamanho da altura da tela
     std::vector<SnakeType> snake;
     char m_snake_char; // desenha a snake
+    SnakeType v_food;
+    char m_food_char;
 
 public:
     SnakeGame()
@@ -40,6 +42,10 @@ public:
         m_maxheight = getmaxy(stdscr) / 2;
 
         m_snake_char = 'o'; // desenha a snake
+
+        m_food_char = 'X';
+        srand(time(NULL)); // para toda vez que iniciar o game, a posição da comida ser aleatória
+        m_insert_food();
 
         // Desenha o espaço do game
         for (int i = 0; i < m_maxwidth - 1; ++i)
@@ -118,6 +124,9 @@ public:
             move(snake[i].s_y, snake[i].s_x);
             addch(m_snake_char);
         }
+
+        move(v_food.s_y, v_food.s_x);
+        addch(m_food_char);
     }
 
     ~SnakeGame()
@@ -125,6 +134,36 @@ public:
         nodelay(stdscr, false);
         getch();
         endwin();
+    }
+
+    void m_insert_food()
+    {
+        while (true)
+        {
+            int tmpx = rand() % m_maxwidth + 1;
+            int tmpy = rand() % m_maxheight + 1;
+
+            for (int i = 0; i < snake.size(); ++i)
+            {
+                if (snake[i].s_x == tmpx && snake[i].s_y == tmpy)
+                {
+                    continue;
+                }
+            }
+
+            if (tmpx >= m_maxwidth - 2 || tmpy >= m_maxheight - 3)
+            {
+                continue;
+            }
+
+            v_food.s_x = tmpx;
+            v_food.s_y = tmpy;
+            break;
+
+            move(v_food.s_y, v_food.s_x);
+            addch(m_food_char);
+            refresh();
+        }
     }
 };
 
