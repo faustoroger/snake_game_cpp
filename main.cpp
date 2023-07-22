@@ -24,10 +24,16 @@ class SnakeGame
 protected:
     int m_maxwidth;  // tamanho da largura da tela
     int m_maxheight; // tamanho da altura da tela
+
     std::vector<SnakeType> snake;
     char m_snake_char; // desenha a snake
+
     SnakeType v_food;
     char m_food_char;
+
+    int m_delay;
+    char m_direction;
+    bool m_tail_stop;
 
 public:
     SnakeGame()
@@ -46,6 +52,10 @@ public:
         m_food_char = 'X';
         srand(time(NULL)); // para toda vez que iniciar o game, a posição da comida ser aleatória
         m_insert_food();
+
+        m_delay = 100000;
+        m_direction = 'L';
+        m_tail_stop = false;
 
         // Desenha o espaço do game
         for (int i = 0; i < m_maxwidth - 1; ++i)
@@ -127,6 +137,7 @@ public:
 
         move(v_food.s_y, v_food.s_x);
         addch(m_food_char);
+        refresh();
     }
 
     ~SnakeGame()
@@ -165,10 +176,88 @@ public:
             refresh();
         }
     }
+
+    void movesnake()
+    {
+        int tmp = getch();
+        switch (tmp)
+        {
+        case KEY_LEFT:
+            if (m_direction != 'R')
+            {
+                m_direction = 'L';
+            }
+            break;
+        case KEY_UP:
+            if (m_direction != 'D')
+            {
+                m_direction = 'U';
+            }
+            break;
+        case KEY_DOWN:
+            if (m_direction != 'U')
+            {
+                m_direction = 'D';
+            }
+            break;
+        case KEY_RIGHT:
+            if (m_direction != 'L')
+            {
+                m_direction = 'R';
+            }
+            break;
+        case 'q':
+            m_direction = 'Q';
+            break;
+        }
+
+        if (!m_tail_stop)
+        {
+            move(snake[snake.size() - 1].s_y, snake[snake.size() - 1].s_x);
+            printw(" ");
+            refresh();
+            snake.pop_back();
+        }
+
+        if (m_direction == 'L')
+        {
+            snake.insert(snake.begin(), SnakeType(snake[0].s_x - 1, snake[0].s_y));
+        }
+        else if (m_direction == 'R')
+        {
+            snake.insert(snake.begin(), SnakeType(snake[0].s_x + 1, snake[0].s_y));
+        }
+        else if (m_direction == 'U')
+        {
+            snake.insert(snake.begin(), SnakeType(snake[0].s_x, snake[0].s_y - 1));
+        }
+        else if (m_direction == 'D')
+        {
+            snake.insert(snake.begin(), SnakeType(snake[0].s_x, snake[0].s_y + 1));
+        }
+
+        move(snake[0].s_y, snake[0].s_x);
+        addch(m_snake_char);
+        refresh();
+    }
+
+    void start()
+    {
+        while (true)
+        {
+            movesnake();
+            if (m_direction == 'Q')
+            {
+                break;
+            }
+            usleep(m_delay);
+        }
+    }
 };
 
 int main(int argc, char **argv)
 {
     SnakeGame s;
+    s.start();
     return EXIT_SUCCESS;
 }
