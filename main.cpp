@@ -35,6 +35,8 @@ protected:
     char m_direction;
     bool m_tail_stop;
 
+    int m_score;
+
 public:
     SnakeGame()
     {
@@ -241,10 +243,54 @@ public:
         refresh();
     }
 
+    bool _collide()
+    {
+        // colisão com as bordas
+        if (snake[0].s_x == 0 || snake[0].s_x == m_maxwidth - 1 || snake[0].s_y == 0 || snake[0].s_y == m_maxheight - 2)
+        {
+            return true;
+        }
+
+        // colisão com a própria cauda
+        for (int i = 2; i < snake.size(); ++i)
+        {
+            if (snake[0].s_x == snake[i].s_x && snake[0].s_y == snake[i].s_y)
+            {
+                return true;
+            }
+        }
+
+        // colisão de ponto
+        if (snake[0].s_x == v_food.s_x && snake[0].s_y == v_food.s_y)
+        {
+            m_tail_stop = true;
+            m_insert_food();
+            m_score += 10;
+            move(m_maxheight - 1, 0);
+            printw("%d", m_score);
+            if ((m_score % 50) == 0)
+            {
+                m_delay -= 10000;
+            }
+        }
+        else
+        {
+            m_tail_stop = false;
+        }
+
+        return false;
+    }
+
     void start()
     {
         while (true)
         {
+            if (_collide())
+            {
+                move(m_maxheight / 2, (m_maxwidth / 2) - 4);
+                printw("GAME OVER");
+            }
+
             movesnake();
             if (m_direction == 'Q')
             {
